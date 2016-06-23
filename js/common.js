@@ -30,7 +30,6 @@ function upload( file, kode, directory, submit ) {
 };
 
 var waitModal;
-var kodeAplikasi;
 
 /**
  * Pesan yang akan ditampilkan ketika terjadi suatu proses.
@@ -45,7 +44,7 @@ var message = {
 	/**
 	 * Proses menghasilkan pesan yang perlu ditampilkan.
 	 */
-	show: function( msg ) {
+	write: function( msg ) {
 		
 		alert( msg );
 		
@@ -306,10 +305,10 @@ function rest( link, projectName) {
 			var promise = $.ajax(
 			{
 		        type: 'POST',
-		        url: targetUrl + '/token/' + _username,
+		        url: targetUrl + '/token',
 				contentType: 'application/json',
 		        processData: false,
-				data: JSON.stringify( { password: _password } ),
+				data: JSON.stringify( { username: _username, password: _password } ),
 			        
 				beforeSend: function (jqXHR, settings)
 				{
@@ -321,23 +320,16 @@ function rest( link, projectName) {
 					
 		    } );
 	
-			var success = function( result ) {
-	
-				//result = JSON.parse( result );
-				
+		    promise.done( function( result ) {
 				if ( result.tipe == "ENTITY" ) {
-	
-					operator.setToken( result.object ); // Atur token baru, token menggunakan RestMessage
+					
+					message.write( "Login Berhasil" );
+					session.setToken( result.object ); // Atur token baru, token menggunakan RestMessage
 					window.location.href = 'index.html';
-	
 				} else {
-	
-					message.write( result.message );
-	
+					message.write( "Kombinasi username dan password salah" );
 				}
-			};
-	
-		    promise.done( success );
+			} );
 		    promise.fail( function( jqXHR, textStatus, errorThrown ) {
 				message.write( "Kombinasi username dan password salah" );
 				message.log( jqXHR, textStatus, errorThrown );
@@ -354,7 +346,7 @@ function rest( link, projectName) {
 			var promise = $.ajax(
 				{
 					type: 'PUT',
-					url: targetUrl + '/token/' + operator.getTokenString(),
+					url: targetUrl + '/token/' + session.getKode(),
 					
 					beforeSend: function ( jqXHR, settings )
 					{
@@ -368,10 +360,8 @@ function rest( link, projectName) {
 					
 		    promise.done( function( result ) {
 					
-				operator.reset();
-					
+				session.reset();
 				message.write( "Berhasil Logout!" );
-	
 				window.location.href = 'login.html';
 	
 			});
@@ -1123,15 +1113,7 @@ var storage = {
 	},
 
 	reset: function () {
-		
-		pegawaiRestAdapter.findAll( function( result ) {
-			storage.set( ( result ? result.list : [] ), pegawaiDomain.nama );
-		});
-
-		unitKerjaRestAdapter.all( function( result ) {
-			storage.set( ( result ? result.list : [] ), unitKerjaDomain.nama );
-		});
-
+		// clear all storage
 	},
 
 	fill: function ( storageName ) {
@@ -1240,7 +1222,7 @@ function changeChar( str, oldChar, newChar ) {
  * Variabel untuk menampung data pegawai yang melakukan login berdasarkan token.
  * Digunakan untuk otentikasi dan otorisasi.
  */
-var operator = {
+var session = {
 
 	/*
 	 * Mengambil objek token. Hanya digunakan untuk tujuan spesifik.
@@ -1251,7 +1233,6 @@ var operator = {
 		var token = localStorage.getItem( 'token' );
 
 		// jika token null, cek cookie dan request token dari server.
-		
 		if ( token == null )
 			throw new Error( "Token = null" );
 
@@ -1282,15 +1263,13 @@ var operator = {
 	 * Mengambil token yang akan digunakan sebagai pengganti password.
 	 * Hanya bekerja jika sudah berhasil login. Jika tidak akan menghasilkan null.
 	 */
-	getTokenString: function() {
-
-		var token;
+	getKode: function() {
 		
 		try {
 			
-			token = this.getToken();
+			var token = this.getToken();
 		
-			return token.token;
+			return token.kode;
 			
 		} catch ( e ) {
 			
@@ -1302,15 +1281,13 @@ var operator = {
 	/*
 	 * Mengambil objek pegawai yang sedang login.
 	 */
-	getPegawai: function() {
-
-		var token;
+	getOperator: function() {
 	
 		try {
 			
-			token = this.getToken();
+			var token = this.getToken();
 
-			return token.pegawai;
+			return token.operator;
 			
 		} catch ( e ) {
 			
@@ -1321,39 +1298,11 @@ var operator = {
 	
 	getSatuanKerja: function() {
 
-		var pegawai;
-	
 		try {
 
-			pegawai = this.getPegawai();
+			var operator = this.getOperator();
 			
-			return pegawai.unitKerja;
-			
-		} catch ( e ) {
-			
-			throw e;
-			
-		}
-	},
-
-	getOperator: function() {
-
-		var pegawai;
-	
-		try {
-
-			pegawai = this.getPegawai();
-			var listOperator = pegawai.listOperator;
-			var size = listOperator.length;
-			
-			for ( var i = 0; i < size; i++ ) {
-				var tmp = listOperator[ i ];
-				
-				if ( tmp && tmp.kodeAplikasi == kodeAplikasi )
-					return tmp;
-			}
-			
-			throw new Error( "Bukan Operator" );
+			return operator.unit;
 			
 		} catch ( e ) {
 			
@@ -1367,14 +1316,12 @@ var operator = {
 	 * Sering digunakan untuk melakukan REST request.
 	 */
 	getUsername: function() {
-
-		var pegawai;
 		
 		try {
 			
-			pegawai = this.getPegawai();
+			var operator = this.getOperator();
 
-			return pegawai.nip;
+			return operator.username;
 			
 		} catch ( e ) {
 			
@@ -1389,13 +1336,11 @@ var operator = {
 	 */
 	getName: function() {
 
-		var pegawai;
-		
 		try {
 			
-			pegawai = this.getPegawai();
+			var operator = this.getOperator();
 
-			return pegawai.nama;
+			return operator.nama;
 			
 		} catch ( e ) {
 			
@@ -1409,15 +1354,10 @@ var operator = {
 	 * Digunakan untuk proses otorisasi setelah login.
 	 */
 	getRole: function() {
-
-		if ( this.getUsername() == 'superuser' )
-			return 'ADMIN';
-	
-		var operator;
 		
 		try {
 			
-			operator = this.getOperator();
+			var operator = this.getOperator();
 			
 			return operator.role;
 			
@@ -1453,7 +1393,7 @@ var operator = {
 			
 			var token = this.getToken();
 			var now = myDate.fromDate( new Date() );
-			var expire = myDate.fromFormattedString( token.expireStr );
+			var expire = myDate.fromDatePicker( token.tanggalExpire );
 			
 			// Jika token sudah expire, maka user dianggap belum login
 			if ( now.isAfter( expire ) )
@@ -1466,33 +1406,6 @@ var operator = {
 			return false;
 			
 		}
-	},
-	
-	isAuthorized: function() {
-
-		if ( this.isAuthenticated() == false )
-			return false;
-		
-		// Reload token
-		// restAdapter.callFree( '/token/' + this.getTokenString(), null, 'GET', function( result ) {
-		// 	if ( result.tipe == 'ENTITY')
-		//		operator.setToken( result.object );
-		// },
-		// message.writeError, 
-		// false
-		// );
-
-		var role = this.getRole();
-		if ( ( role != 'ADMIN' && role != 'OPERATOR' ) ) {
-
-			message.write( 'Maaf, anda tidak bisa mengakses halaman ini' );
-			message.writeLog( 'Maaf, anda tidak bisa mengakses halaman ini' ); // LOG
-
-			return false;
-
-		}
-		
-		return true;
 		
 	}
 };
