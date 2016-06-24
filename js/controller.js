@@ -31,8 +31,8 @@ $( document ).ready( function () {
 	page.change( $( '#operator-nama' ), session.getName() );
 	page.setName( 'HOME' );
 	
-	var navDef = navigation( role, session.getSatuanKerja() );
-	page.change( $( '#nav-menu' ), navDef );
+	setHomePage( role, session.getSatuanKerja() );
+	setNavigation( role, session.getSatuanKerja() );
 
 	$( function () {
 		$( '[ data-toggle = "tooltip" ]' ).tooltip();
@@ -120,77 +120,55 @@ $( document ).ready( function () {
 
 } );
 
-function navigation( role, unit ) {
-	if ( role == "ADMIN" ) {
-		
-		return '' +
-			'<li class="divider">&nbsp;</li>' +
-			'<li><a id="menu-admin-1" href="#" data-toggle="tooltip" data-placement="right" title="Menu Admin 1"><span class="glyphicon glyphicon-home big-icon"></span><b class="icon-text">Menu Admin 1</b></a></li>' +
-			'<li><a id="menu-admin-2" href="#" data-toggle="tooltip" data-placement="right" title="Menu Admin 2"><span class="glyphicon glyphicon-user big-icon"></span><b class="icon-text">Menu Admin 2</b></a></li>' +
-			'<li class="divider">&nbsp;</li>' +
-			'<li><a id="menu-admin-3" href="#" data-toggle="tooltip" data-placement="right" title="Menu Admin 3"><span class="glyphicon glyphicon-briefcase big-icon"></span><b class="icon-text">Menu Admin 3</b></a></li>';
+function setNavigation( role, unit ) {
 
+	if ( role == "ADMIN" ) {
+		page.load( $( '#nav-menu' ), 'html/navigation/admin.html' );
 	} else if ( role == "OPERATOR" ) {
 		
-		
 		var tipe = unit.tipe;
-		if ( tipe == "POLIKLINIK" ) {
-			
-			return '' +
-				'<li class="divider">&nbsp;</li>' +
-				'<li><a id="menu-poliklinik-1" href="#" data-toggle="tooltip" data-placement="right" title="Menu Poliklinik 1"><span class="glyphicon glyphicon-home big-icon"></span><b class="icon-text">Menu Poliklinik 1</b></a></li>' +
-				'<li><a id="menu-poliklinik-2" href="#" data-toggle="tooltip" data-placement="right" title="Menu Poliklinik 2"><span class="glyphicon glyphicon-user big-icon"></span><b class="icon-text">Menu Poliklinik 2</b></a></li>' +
-				'<li class="divider">&nbsp;</li>' +
-				'<li><a id="menu-poliklinik-3" href="#" data-toggle="tooltip" data-placement="right" title="Menu Poliklinik 3"><span class="glyphicon glyphicon-briefcase big-icon"></span><b class="icon-text">Menu Poliklinik 3</b></a></li>';
-			
-		} else if ( tipe == "LOKET_PENDAFTARAN" || tipe == "PENUNJANG_MEDIK" ) {
-			
-			return '' +
-				'<li class="divider">&nbsp;</li>' +
-				'<li><a id="menu-pendaftaran-1" href="#" data-toggle="tooltip" data-placement="right" title="Menu Pendaftaran 1"><span class="glyphicon glyphicon-home big-icon"></span><b class="icon-text">Menu Pendaftaran 1</b></a></li>' +
-				'<li><a id="menu-pendaftaran-2" href="#" data-toggle="tooltip" data-placement="right" title="Menu Pendaftaran 2"><span class="glyphicon glyphicon-user big-icon"></span><b class="icon-text">Menu Pendaftaran 2</b></a></li>' +
-				'<li class="divider">&nbsp;</li>' +
-				'<li><a id="menu-pendaftaran-3" href="#" data-toggle="tooltip" data-placement="right" title="Menu Pendaftaran 3"><span class="glyphicon glyphicon-briefcase big-icon"></span><b class="icon-text">Menu Pendaftaran 3</b></a></li>';
-			
+		if ( tipe == "POLIKLINIK" || tipe == "PENUNJANG_MEDIK" ) {
+			page.load( $( '#nav-menu' ), 'html/navigation/poliklinik.html' );
+		} else if ( tipe == "LOKET_PENDAFTARAN" ) {
+			page.load( $( '#nav-menu' ), 'html/navigation/pendaftaran.html' );
 		} else if ( tipe == "LOKET_PEMBAYARAN" ) {
-			
-			return '' +
-				'<li class="divider">&nbsp;</li>' +
-				'<li><a id="menu-pembayaran-1" href="#" data-toggle="tooltip" data-placement="right" title="Menu Pembayaran 1"><span class="glyphicon glyphicon-home big-icon"></span><b class="icon-text">Menu Pembayaran 1</b></a></li>' +
-				'<li><a id="menu-pembayaran-2" href="#" data-toggle="tooltip" data-placement="right" title="Menu Pembayaran 2"><span class="glyphicon glyphicon-user big-icon"></span><b class="icon-text">Menu Pembayaran 2</b></a></li>' +
-				'<li class="divider">&nbsp;</li>' +
-				'<li><a id="menu-pembayaran-3" href="#" data-toggle="tooltip" data-placement="right" title="Menu Pembayaran 3"><span class="glyphicon glyphicon-briefcase big-icon"></span><b class="icon-text">Menu Pembayaran 3</b></a></li>';
-			
+			page.load( $( '#nav-menu' ), 'html/navigation/pembayaran.html' );
 		} else if ( tipe == "RUANG_PERAWATAN" || tipe == "ICU" ) {
-			
-			return '' +
-				'<li class="divider">&nbsp;</li>' +
-				'<li><a id="menu-ruangan-1" href="#" data-toggle="tooltip" data-placement="right" title="Menu Ruangan 1"><span class="glyphicon glyphicon-home big-icon"></span><b class="icon-text">Menu Ruangan 1</b></a></li>' +
-				'<li><a id="menu-ruangan-2" href="#" data-toggle="tooltip" data-placement="right" title="Menu Ruangan 2"><span class="glyphicon glyphicon-user big-icon"></span><b class="icon-text">Menu Ruangan 2</b></a></li>' +
-				'<li class="divider">&nbsp;</li>' +
-				'<li><a id="menu-ruangan-3" href="#" data-toggle="tooltip" data-placement="right" title="Menu Ruangan 3"><span class="glyphicon glyphicon-briefcase big-icon"></span><b class="icon-text">Menu Ruangan 3</b></a></li>';
-
+			page.load( $( '#nav-menu' ), 'html/navigation/ruangan.html' );
 		} else if ( tipe == "APOTEK_FARMASI" ) {
-			
-			return '' +
-				'<li class="divider">&nbsp;</li>' +
-				'<li><a id="menu-apotek-1" href="#" data-toggle="tooltip" data-placement="right" title="Menu Apotek 1"><span class="glyphicon glyphicon-home big-icon"></span><b class="icon-text">Menu Apotek 1</b></a></li>' +
-				'<li><a id="menu-apotek-2" href="#" data-toggle="tooltip" data-placement="right" title="Menu Apotek 2"><span class="glyphicon glyphicon-user big-icon"></span><b class="icon-text">Menu Apotek 2</b></a></li>' +
-				'<li class="divider">&nbsp;</li>' +
-				'<li><a id="menu-apotek-3" href="#" data-toggle="tooltip" data-placement="right" title="Menu Apotek 3"><span class="glyphicon glyphicon-briefcase big-icon"></span><b class="icon-text">Menu Apotek 3</b></a></li>';
-				
+			page.load( $( '#nav-menu' ), 'html/navigation/apotek.html' );
 		} else if ( tipe == "UGD" ) {
-			
-			return '' +
-				'<li class="divider">&nbsp;</li>' +
-				'<li><a id="menu-ugd-1" href="#" data-toggle="tooltip" data-placement="right" title="Menu Ugd 1"><span class="glyphicon glyphicon-home big-icon"></span><b class="icon-text">Menu Ugd 1</b></a></li>' +
-				'<li><a id="menu-ugd-2" href="#" data-toggle="tooltip" data-placement="right" title="Menu Ugd 2"><span class="glyphicon glyphicon-user big-icon"></span><b class="icon-text">Menu Ugd 2</b></a></li>' +
-				'<li class="divider">&nbsp;</li>' +
-				'<li><a id="menu-ugd-3" href="#" data-toggle="tooltip" data-placement="right" title="Menu Ugd 3"><span class="glyphicon glyphicon-briefcase big-icon"></span><b class="icon-text">Menu Ugd 3</b></a></li>';
-				
+			page.load( $( '#nav-menu' ), 'html/navigation/ugd.html' );
 		}
 
 	} else {
 		throw new Error( "Role: '" + role + "' is unknown" );
 	}
 };
+
+function setHomePage( role, unit ) {
+
+	if ( role == "ADMIN" ) {
+		page.load( $( '#content' ), 'html/home/admin.html' );
+	} else if ( role == "OPERATOR" ) {
+		
+		var tipe = unit.tipe;
+		if ( tipe == "POLIKLINIK" || tipe == "PENUNJANG_MEDIK" ) {
+			page.load( $( '#content' ), 'html/home/poliklinik.html' );
+		} else if ( tipe == "LOKET_PENDAFTARAN" ) {
+			page.load( $( '#content' ), 'html/home/pendaftaran.html' );
+		} else if ( tipe == "LOKET_PEMBAYARAN" ) {
+			page.load( $( '#content' ), 'html/home/pembayaran.html' );
+		} else if ( tipe == "RUANG_PERAWATAN" || tipe == "ICU" ) {
+			page.load( $( '#content' ), 'html/home/ruangan.html' );
+		} else if ( tipe == "APOTEK_FARMASI" ) {
+			page.load( $( '#content' ), 'html/home/apotek.html' );
+		} else if ( tipe == "UGD" ) {
+			page.load( $( '#content' ), 'html/home/ugd.html' );
+		}
+
+	} else {
+		throw new Error( "Role: '" + role + "' is unknown" );
+	}
+};
+
