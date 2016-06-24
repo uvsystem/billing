@@ -48,15 +48,28 @@ $( document ).ready( function () {
 
 	} );
 
-	// handler untuk membuka modal 
+	// handler untuk ubah password
 	$( document ).on( 'click', '#btn-ubah-password', function() {
 
 		var password = $( '#form-password' ).val();
-		var pegawai = operator.getPegawai();
+		alert( "Belum bisa mengubah password" );
+		
+	} );
 
-		pegawaiRestAdapter.updatePassword( pegawai.id, password, function( result ) {
-			message.success( result );
-		} );
+	// handler untuk buka halaman tagihan
+	$( document ).on( 'click', '#menu-poliklinik-tagihan', function() {
+		page.load( $( '#content' ), 'html/home/poliklinik.html' );
+	} );
+
+	// handler untuk cari data pasien
+	$( document ).on( 'click', '#btn-get-pasien', function() {
+		var kodePasien = $( '#txt-kode-pasien' ).val();
+		alert( "get data pasien. kode: " + kodePasien );
+	} );
+	
+	// handler untuk tambah tagihan
+	$( document ).on( 'click', '#btn-tambah-tagihan', function() {
+		alert( "Tambah tagihan tindakan" );
 	} );
 	
 	// Table Handler
