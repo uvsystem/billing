@@ -64,12 +64,72 @@ $( document ).ready( function () {
 	// handler untuk cari data pasien
 	$( document ).on( 'click', '#btn-get-pasien', function() {
 		var kodePasien = $( '#txt-kode-pasien' ).val();
-		alert( "get data pasien. kode: " + kodePasien );
+
+		var succList = function( res ) {
+			
+			if ( res && res.tipe == 'ERROR' ) {
+				alert( "Belum ada tagihan untuk pasien" );
+				return;
+			}
+
+			var listTagihan = res.list;
+			var html = '';
+			for ( i = 0; i < listTagihan.length; i++ ) {
+				var tagihan = listTagihan[ i ];
+				html += '<tr>' +
+					'<td>' + tagihan.tanggal + '</td>' +
+					'<td>' + tagihan.namaUnit + '</td>' +
+					'<td>' + tagihan.nama + '</td>' +
+					'<td>' + tagihan.jumlah + '</td>' +
+					'<td>' + tagihan.tagihanCounted + '</td>' +
+					'</tr>';
+			}
+
+			page.change( $( '#table-tagihan' ), html );
+
+		}
+		
+		var succ = function( res ) {
+			
+			if ( res && res.tipe == 'ERROR' ) {
+				alert( "Tidak ada pasien dengan kode: " + kodePasien );
+				return;
+			}
+
+			var pasien = res.object;
+			
+			page.change( $( '#pasien-medrek' ), "Medrek: " + pasien.penduduk.kode );
+			page.change( $( '#pasien-nama' ), pasien.nama );
+			page.change( $( '#pasien-umur' ), pasien.umur + " Tahun" );
+			page.change( $( '#pasien-kelamin' ), pasien.kelamin );
+			page.change( $( '#pasien-agama'), pasien.agama );
+			page.change( $( '#pasien-kelas'), "Kelas " + pasien.kelas );
+			page.change( $( '#pasien-tanggungan'), "Pasien " + pasien.penanggung );
+			
+			var pelayananRest = rest( "http://222.124.150.12:8080", "service");
+			pelayananRest.call( "/pelayanan/pasien/" + pasien.id, null, "GET", succList, message.writeError, false );
+			
+		};
+		
+		var pasienRest = rest( "http://222.124.150.12:8080", "patient" );
+		pasienRest.call( "/pasien/kode/" + kodePasien, null, "GET", succ, message.writeError, false );
+
 	} );
 	
 	// handler untuk tambah tagihan
 	$( document ).on( 'click', '#btn-tambah-tagihan', function() {
 		alert( "Tambah tagihan tindakan" );
+	} );
+	
+	// handler untuk menu ruangan
+	$( document ).on( 'click', '#menu-ruangan', function() {
+		alert( "halaman data ruangan" );
+	} );	
+	
+	// handler untuk menu tagihan ruangan
+	// tagihan ruangan sama dengan tagihan poliklinik
+	$( document ).on( 'click', '#menu-ruangan', function() {
+		page.load( $( '#content' ), 'html/home/poliklinik.html' );
 	} );
 	
 	// Table Handler

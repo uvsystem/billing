@@ -103,7 +103,7 @@ var message = {
 	 */
 	writeError: function( jqXHR, textStatus, errorThrown ) {
 
-		this.show( 'Error : ' + textStatus + ' - ' + errorThrown );
+		alert( 'Error : ' + textStatus + ' - ' + errorThrown );
 		
 	},
 		
@@ -166,22 +166,17 @@ function rest( link, projectName) {
 		call: function( path, data, method, success, error, async ) {
 	
 			// Jika tidak login, redirect ke halaman login.
-			if ( operator.isAuthenticated() == false ) {
-					
+			if ( session.isAuthenticated() == false ) {
+
 				window.location.href = 'login.html';
 				return;
-					
+
 			}
 			
 			if ( async == null )
 				async = true;
-						
-			// Token menjadi pengganti password user.
-			var _password = operator.getTokenString();
-			var _username = operator.getUsername();
-			
+
 			var targetUrl = this.url + path;
-	
 			var promise = $.ajax(
 				{
 			        type: method,
@@ -196,7 +191,7 @@ function rest( link, projectName) {
 						
 						if ( waitModal )
 							waitModal.show();
-						jqXHR.setRequestHeader ("Authorization", "Basic " + btoa( _username + ':' + _password ) );
+						jqXHR.setRequestHeader ("Authorization", "Basic " + btoa( session.getUsername() + ':' + session.getKode() ) );
 						
 					}
 				}
@@ -204,8 +199,6 @@ function rest( link, projectName) {
 	
 		    promise.done( function( result )
 			{
-	
-				// result = JSON.parse( result ); // Otomatis parse object menjadi JSON. Dan eksekusi function
 					
 				if ( result.tipe == "ERROR" )
 					message.logResult( result ); // LOG
