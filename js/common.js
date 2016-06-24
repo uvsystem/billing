@@ -1024,21 +1024,41 @@ var myList = {
 		message.writeLog( "Returning null for username: " + username );
 		
 		return null;
+	},
+	
+	removeById: function( list, id ) {
+		
+		if ( list ) {
+
+			var newList = [];
+			var newIndex = 0;
+			for ( var index = 0; index < list.length; index++ ) {
+
+				var obj = list[ index ];
+
+				if ( id != obj.id ) {
+					newList[ newIndex ] = obj;
+					newIndex++;
+				}
+			}
+		}
+		
+		return newList;
 	}
 };
 
 var storage = {
 
-	set: function ( list, storageName ) {
+	set: function ( object, storageName ) {
 
 		storageName = storageName.toLowerCase();
 
-		message.writeLog("api.js: setStorage(): Storage " + storageName + " is set : " + ( list != null ) ); // LOG
+		message.writeLog("api.js: setStorage(): Storage " + storageName + " is set : " + ( object != null ) ); // LOG
 
-		if ( list != null )
-			list = JSON.stringify( list );
+		if ( object != null )
+			object = JSON.stringify( object );
 
-		localStorage.setItem( storageName, list );
+		localStorage.setItem( storageName, object );
 		
 	},
 

@@ -64,6 +64,7 @@ $( document ).ready( function () {
 	// handler untuk cari data pasien
 	$( document ).on( 'click', '#btn-get-pasien', function() {
 		var kodePasien = $( '#txt-kode-pasien' ).val();
+		var pasien;
 
 		var succList = function( res ) {
 			
@@ -73,20 +74,10 @@ $( document ).ready( function () {
 			}
 
 			var listTagihan = res.list;
-			var html = '';
-			for ( i = 0; i < listTagihan.length; i++ ) {
-				var tagihan = listTagihan[ i ];
-				html += '<tr>' +
-					'<td>' + tagihan.tanggal + '</td>' +
-					'<td>' + tagihan.namaUnit + '</td>' +
-					'<td>' + tagihan.nama + '</td>' +
-					'<td>' + tagihan.jumlah + '</td>' +
-					'<td>' + tagihan.tagihanCounted + '</td>' +
-					'</tr>';
-			}
-
-			page.change( $( '#table-tagihan' ), html );
-
+			pasien.listTagihan = listTagihan;
+			storage.set( pasien, 'pasien' );
+			
+			tagihanView.setTable( listTagihan );
 		}
 		
 		var succ = function( res ) {
@@ -96,7 +87,7 @@ $( document ).ready( function () {
 				return;
 			}
 
-			var pasien = res.object;
+			pasien = res.object;
 			
 			page.change( $( '#pasien-medrek' ), "Medrek: " + pasien.penduduk.kode );
 			page.change( $( '#pasien-nama' ), pasien.nama );
@@ -245,3 +236,54 @@ function setHomePage( role, unit ) {
 	}
 };
 
+var tagihanView = {
+	
+	setTable: function( data ) {
+		var html = '';
+
+		for ( i = 0; i < data.length; i++ ) {
+			var tagihan = data[ i ];
+			var tanggal = myDate.fromDatePicker( tagihan.tanggal );
+
+			html += '<tr>' +
+				'<td>' + tanggal.getString() + '</td>' +
+				'<td>' + tagihan.namaUnit + '</td>' +
+				'<td>' + tagihan.nama + '</td>' +
+				'<td>' + tagihan.jumlah + '</td>' +
+				'<td>' + number.addCommas( tagihan.tagihanCounted ) + '</td>' +
+				'<td>' +
+				'<button type="button" class="btn btn-danger btn-xs pull-right" onclick="tagihanView.dropTagihan(' + tagihan.id + ')">' +
+				'<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>' +
+				' Hapus' +
+				'</button>' +
+				'</td>' +
+				'</tr>';
+		}
+
+		page.change( $( '#table-tagihan' ), html );
+	},
+	
+	dropTagihan: function( id ) {
+		var pelayananRest = rest( "http://222.124.150.12:8080", "service");
+		pelayananRest.call( "/pelayanan/" + id, null, "DELETE", function( res ) {
+			
+			if ( res.tipe == "ERROR" ) {
+				alert( res.message );
+				return;
+			}
+			
+			var pasien = storage.get( 'pasien' );
+
+			// hapus tagihan dari list
+			var listTagihan = pasien.listTagihan;
+			listTagihan = myList.removeById( listTagihan, id );
+			tagihanView.setTable( listTagihan );
+			
+			// reset pasien dalam storage dengan data yang baru
+			pasien.listTagihan = listTagihan;
+			storage.set( pasien, 'pasien' );
+
+		}, message.writeError, false );
+		
+	}
+};
