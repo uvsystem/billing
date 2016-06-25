@@ -64,21 +64,6 @@ $( document ).ready( function () {
 	// handler untuk cari data pasien
 	$( document ).on( 'click', '#btn-get-pasien', function() {
 		var kodePasien = $( '#txt-kode-pasien' ).val();
-		var pasien;
-
-		var succList = function( res ) {
-			
-			if ( res && res.tipe == 'ERROR' ) {
-				alert( "Belum ada tagihan untuk pasien" );
-				return;
-			}
-
-			var listTagihan = res.list;
-			pasien.listTagihan = listTagihan;
-			storage.set( pasien, 'pasien' );
-			
-			tagihanView.setTable( listTagihan );
-		}
 		
 		var succ = function( res ) {
 			
@@ -87,7 +72,8 @@ $( document ).ready( function () {
 				return;
 			}
 
-			pasien = res.object;
+			var pasien = res.object;
+			storage.set( pasien, 'pasien' );
 			
 			page.change( $( '#pasien-medrek' ), "Medrek: " + pasien.penduduk.kode );
 			page.change( $( '#pasien-nama' ), pasien.nama );
@@ -98,7 +84,7 @@ $( document ).ready( function () {
 			page.change( $( '#pasien-tanggungan'), "Pasien " + pasien.penanggung );
 			
 			var pelayananRest = rest( "http://222.124.150.12:8080", "service");
-			pelayananRest.call( "/pelayanan/pasien/" + pasien.id, null, "GET", succList, message.writeError, false );
+			pelayananRest.call( "/pelayanan/pasien/" + pasien.id, null, "GET", tagihanView.loadTagihan, message.writeError, false );
 			
 		};
 		
@@ -106,10 +92,74 @@ $( document ).ready( function () {
 		pasienRest.call( "/pasien/kode/" + kodePasien, null, "GET", succ, message.writeError, false );
 
 	} );
+
+	// handler untuk cari tindakan
+	$( document ).on( 'click', '#btn-get-tindakan', function() {
+		var kodeTindakan = $( '#txt-kode-tindakan' ).val();
+
+		var succ = function( res ) {
+			
+			if ( res && res.tipe == 'ERROR' ) {
+				alert( "Tidak ada tindakan dengan kata kunci: " + kodeTindakan );
+				return;
+			}
+			
+			var listTindakan = res.list;
+			storage.set( listTindakan, 'listTindakan' );
+			
+			var html = "";
+			for ( i = 0; i < listTindakan.length; i++ ) {
+				var tindakan = listTindakan[ i ];
+				
+				html += '<tr>' +
+					'<td>' + tindakan.nama + '</td>' +
+					'<td>' + tindakan.kelas + '</td>' +
+					'<td>' +
+					'<button type="button" class="btn btn-warning btn-xs pull-right" onclick="tagihanView.pilihTindakan(' + tindakan.id + ')">' +
+					'<span class="glyphicon glyphicon-check" aria-hidden="true"></span>' +
+					' Pilih' +
+					'</button>' +
+					'</td>' +
+					'</tr>';
+			}
+
+			page.change( $( '#table-tindakan' ), html );
+		};
+		
+		var tindakanRest = rest( 'http://222.124.150.12:8080', 'treatment' );
+		tindakanRest.call( "/tindakan/keyword/" + kodeTindakan, null, "GET", succ, message.writeError, false );
+	} );
 	
-	// handler untuk tambah tagihan
-	$( document ).on( 'click', '#btn-tambah-tagihan', function() {
-		alert( "Tambah tagihan tindakan" );
+	// handler untuk simpan tagihan
+	$( document ).on( 'click', '#btn-tagihan-simpan', function() {
+		var jumlah = $( '#txt-tagihan-jumlah' ).val();
+		var tambahan = $( '#txt-tagihan-biaya-tambahan' ).val();
+		var tindakan = storage.get( 'tindakan' );
+
+		var pasien = storage.get( 'pasien' );
+		pasien.listTagihan = null;
+		
+		var tagihan = {
+			tindakan: tindakan,
+			biayaTambahan: tambahan,
+			jumlah: jumlah,
+			tanggal: myDate.getNowAsDatePicker(),
+			pasien: pasien,
+			unit: session.getSatuanKerja(),
+			status: "MENUNGGAK",
+			tipePelayanan: "PELAYANAN",
+			tipeTagihan: "PELAYANAN",
+			keterangan: null,
+			pelaksana: null
+		}
+
+		var pelayananRest = rest( "http://222.124.150.12:8080", "service");
+		var succ = function( res ) {
+			message.success( res, "Berhasil menambah tagihan pasien" );
+			pelayananRest.call( "/pelayanan/pasien/" + pasien.id, null, "GET", tagihanView.loadTagihan, message.writeError, false );
+		};
+		
+		pelayananRest.call( "/pelayanan", tagihan, "POST", succ, message.writeError, false );
 	} );
 	
 	// handler untuk menu ruangan
@@ -265,7 +315,7 @@ var tagihanView = {
 	
 	dropTagihan: function( id ) {
 		var pelayananRest = rest( "http://222.124.150.12:8080", "service");
-		pelayananRest.call( "/pelayanan/" + id, null, "DELETE", function( res ) {
+		var succ = function( res ) {
 			
 			if ( res.tipe == "ERROR" ) {
 				alert( res.message );
@@ -273,17 +323,50 @@ var tagihanView = {
 			}
 			
 			var pasien = storage.get( 'pasien' );
+			pelayananRest.call( "/pelayanan/pasien/" + pasien.id, null, "GET", tagihanView.loadTagihan, message.writeError, false );
 
 			// hapus tagihan dari list
 			var listTagihan = pasien.listTagihan;
 			listTagihan = myList.removeById( listTagihan, id );
-			tagihanView.setTable( listTagihan );
-			
-			// reset pasien dalam storage dengan data yang baru
-			pasien.listTagihan = listTagihan;
-			storage.set( pasien, 'pasien' );
-
-		}, message.writeError, false );
+			tagihanView.resetTagihan( listTagihan );
+		};
 		
+		pelayananRest.call( "/pelayanan/" + id, null, "DELETE", succ, message.writeError, false );
+		
+	},
+	
+	pilihTindakan: function( id ) {
+		var listTindakan = storage.get( 'listTindakan' );
+		for ( i = 0; i < listTindakan.length; i++ ) {
+			var tindakan = listTindakan[ i ];
+			
+			if ( id == tindakan.id ) {
+				page.change( $( '#tindakan-nama' ), "Tindakan " + tindakan.nama );
+				page.change( $( '#tindakan-kelas' ), "Kelas " + tindakan.kelas );
+				page.change( $( '#tindakan-tanggungan' ), "Tanggungan " + tindakan.penanggung );
+				
+				storage.set( tindakan, 'tindakan' );
+			}
+		}
+	},
+	
+	loadTagihan: function( res ) {
+		
+		if ( res && res.tipe == 'ERROR' ) {
+			alert( "Belum ada tagihan untuk pasien" );
+			return;
+		}
+
+		tagihanView.resetTagihan( res.list );
+	},
+	
+	resetTagihan: function( data ) {
+		var pasien = storage.get( 'pasien' );
+		pasien.listTagihan = data;
+		storage.set( pasien, 'pasien' );
+		
+		tagihanView.setTable( data );
 	}
+	
 };
+

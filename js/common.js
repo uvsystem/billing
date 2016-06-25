@@ -54,39 +54,29 @@ var message = {
 	 * Proses berhasil.
 	 * Lakukan aksi berdasarkan tipe message.
 	 */
-	success: function(result) {
+	success: function( result, msg, tipe ) {
 
-		page.change( $( '#message' ), '');
-	
-		switch ( result.tipe ) {
-		
-			case "SUCCESS": console.log( "Proses SUCCESS" );
-					page.change( $( '#message' ), 
-						'<div id="success-alert" class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Selamat!</strong> ' + result.message + '</div>');
-				break;
-			case "ENTITY": console.log( "Entity Set" );
-					page.change( $( '#message' ), 
-						'<div id="success-alert" class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Selamat!</strong> ' + result.message + '</div>');
-				break;
-			case "LIST": console.log( "List Set" );
-					page.change( $( '#message' ), 
-						'<div id="success-alert" class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Selamat!</strong> ' + result.message + '</div>');
-				break;
-			case "OBJECT": console.log( "Object Set" );
-					page.change( $( '#message' ), 
-						'<div id="success-alert" class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Selamat!</strong> ' + result.message + '</div>');
-				break;
-			case "MESSAGE": 
-					page.change( $( '#message' ), 
-						'<div id="warning-alert" class="alert alert-warning alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Pesan!</strong> ' + result.message + '</div>');
-				break;
-			case "ERROR": 
-					page.change( $( '#message' ), 
-						'<div id="error-alert" class="alert alert-danger alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Error!</strong> ' + result.message + '</div>');
-				break;
-			default: console.log( "Tipe result tidak dikenali : " + result.tipe );
+		page.change( $( '#message' ), '' );
+		if ( !msg )
+			msg = result.message;
+
+		if ( result.tipe == "ERROR" ) {
+			console.log( "Proses GAGAL" );
+			if ( tipe == "INLINE" ) {
+				page.change( $( '#message' ), 
+					'<div id="error-alert" class="alert alert-danger alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Error!</strong> ' + msg + '</div>');
+			} else {
+				alert( "GAGAL. " + msg );
+			}
+		} else {
+			console.log( "Proses Berhasil" );
+			if (result.tipe == "INLINE" ) {
+				page.change( $( '#message' ), 
+					'<div id="success-alert" class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Selamat!</strong> ' + msg + '</div>');
+			} else {
+				alert( "BERHASIL. " + msg );
+			}
 		}
-	
 	},
 		
 	/**
@@ -786,6 +776,11 @@ var myDate = {
 	
 	getNow: function() {
 		return this.fromDate( this.now() );
+	},
+	
+	getNowAsDatePicker: function() {
+		var dt = this.getNow();
+		return dt.getDatePickerString();
 	},
 	
 	getAwal: function() {
