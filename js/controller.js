@@ -64,7 +64,6 @@ $( document ).ready( function () {
 	// handler untuk cari data pasien
 	$( document ).on( 'click', '#btn-get-pasien', function() {
 		var kodePasien = $( '#txt-kode-pasien' ).val();
-		
 		var succ = function( res ) {
 			
 			if ( res && res.tipe == 'ERROR' ) {
@@ -135,10 +134,7 @@ $( document ).ready( function () {
 		var jumlah = $( '#txt-tagihan-jumlah' ).val();
 		var tambahan = $( '#txt-tagihan-biaya-tambahan' ).val();
 		var tindakan = storage.get( 'tindakan' );
-
 		var pasien = storage.get( 'pasien' );
-		pasien.listTagihan = null;
-		
 		var tagihan = {
 			tindakan: tindakan,
 			biayaTambahan: tambahan,
@@ -323,12 +319,7 @@ var tagihanView = {
 			}
 			
 			var pasien = storage.get( 'pasien' );
-			//pelayananRest.call( "/pelayanan/pasien/" + pasien.id, null, "GET", tagihanView.loadTagihan, message.writeError, false );
-
-			// hapus tagihan dari list
-			var listTagihan = pasien.listTagihan;
-			listTagihan = myList.removeById( listTagihan, id );
-			tagihanView.resetTagihan( listTagihan );
+			pelayananRest.call( "/pelayanan/pasien/" + pasien.id, null, "GET", tagihanView.loadTagihan, message.writeError, false );
 		};
 		
 		pelayananRest.call( "/pelayanan/" + id, null, "DELETE", succ, message.writeError, false );
@@ -357,15 +348,7 @@ var tagihanView = {
 			return;
 		}
 
-		tagihanView.resetTagihan( res.list );
-	},
-	
-	resetTagihan: function( data ) {
-		var pasien = storage.get( 'pasien' );
-		pasien.listTagihan = data;
-		storage.set( pasien, 'pasien' );
-		
-		tagihanView.setTable( data );
+		tagihanView.setTable( res.list );
 	}
 	
 };
