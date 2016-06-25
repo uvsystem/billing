@@ -1,3 +1,96 @@
 <div class="row">
-	Halaman Ruangan dan ICU dan NICU
+	<div class="panel panel-primary">
+		<div class="panel-heading"><h4>RANGKUMAN DATA RUANGAN</h4></div>
+		<ul class="list-group">
+			<li class="list-group-item" id="pasien-kelas-vvip">#pasien-kelas-vvip</li>
+			<li class="list-group-item" id="pasien-kelas-vip">#pasien-kelas-vip</li>
+			<li class="list-group-item" id="pasien-kelas-1">#pasien-kelas-1</li>
+			<li class="list-group-item" id="pasien-kelas-2">#pasien-kelas-2</li>
+			<li class="list-group-item" id="pasien-kelas-3">#pasien-kelas-3</li>
+		</ul>
+	</div>
 </div>
+<div class="row">&nbsp;</div>
+<div class="row">
+	<div class="panel panel-primary">
+		<div class="panel-heading clearfix">
+			<h4 class="panel-title pull-left" style="padding-top: 7.5px;">DAFTAR PASIEN RUANGAN</h4>
+			<button type="button" class="btn btn-success pull-right" id="btn-tambah-pasien-ruangan" data-toggle="modal" data-target="#modal-form-pasien-ruangan-tambah">
+				<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+				Tambah Pasien
+			</button>
+		</div>
+		<table class="table">
+			<thead>
+				<tr>
+					<td>KODE PASIEN</td>
+					<td>NO. MEDREK</td>
+					<td>NAMA PASIEN</td>
+					<td>&nbsp;</td>
+				</tr>
+			</thead>
+			<tbody id="table-ruangan">
+				<tr>
+					<td>1</td>
+					<td>1</td>
+					<td>1</td>
+					<td>
+						<button type="button" class="btn btn-danger btn-xs pull-right">
+							<span class="glyphicon glyphicon-open" aria-hidden="true"></span>
+							Keluar Ruangan
+						</button>
+					</td>
+				</tr>
+				<tr>
+					<td>1</td>
+					<td>1</td>
+					<td>1</td>
+					<td>
+						<button type="button" class="btn btn-danger btn-xs pull-right">
+							<span class="glyphicon glyphicon-open" aria-hidden="true"></span>
+							Keluar Ruangan
+						</button>
+					</td>
+				</tr>
+				<tr>
+					<td>1</td>
+					<td>1</td>
+					<td>1</td>
+					<td>
+						<button type="button" class="btn btn-danger btn-xs pull-right">
+							<span class="glyphicon glyphicon-open" aria-hidden="true"></span>
+							Keluar Ruangan
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<!-- Modal untuk tambah tagihan -->
+<div class="modal fade" id="modal-form-pasien-ruangan-tambah" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Tutup</span></button>
+				<h4 class="modal-title">TAMBAH PASIEN MASUK RUANGAN</h4>
+			</div>
+			<div class="modal-body">
+				<!-- textbox kode tindakan -->
+				<div class="input-group">
+					<input type="text" class="form-control" id="txt-kode-pasien" placeholder="Kode Pasien">
+					<span class="input-group-btn">
+						<button class="btn btn-primary" type="button" data-dismiss="modal" id="btn-simpan-pasien-masuk">
+							<span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span>
+							Masuk
+						</button>
+					</span>
+				</div><!-- /input-group -->
+			</div><!-- modal-body -->
+			<div class="modal-footer">
+				<button class="btn btn-default" data-dismiss="modal">Tutup</button>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

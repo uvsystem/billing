@@ -131,17 +131,24 @@ $( document ).ready( function () {
 	
 	// handler untuk simpan tagihan
 	$( document ).on( 'click', '#btn-tagihan-simpan', function() {
-		var jumlah = $( '#txt-tagihan-jumlah' ).val();
-		var tambahan = $( '#txt-tagihan-biaya-tambahan' ).val();
-		var tindakan = storage.get( 'tindakan' );
 		var pasien = storage.get( 'pasien' );
+		if ( !pasien ) {
+			alert( "GAGAL: Anda belum memilih pasien" );
+			return;
+		}
+		
+		var tindakan = storage.get( 'tindakan' );
+		if ( !tindakan ) {
+			alert( "GAGAL: Anda belum memilih tindakan" );
+		}
+
 		var tagihan = {
-			tindakan: tindakan,
-			biayaTambahan: tambahan,
-			jumlah: jumlah,
-			tanggal: myDate.getNowAsDatePicker(),
 			pasien: pasien,
+			tindakan: tindakan,
 			unit: session.getSatuanKerja(),
+			biayaTambahan: $( '#txt-tagihan-biaya-tambahan' ).val(),
+			jumlah: $( '#txt-tagihan-jumlah' ).val(),
+			tanggal: $( '#txt-tagihan-tanggal' ).val(),
 			status: "MENUNGGAK",
 			tipePelayanan: "PELAYANAN",
 			tipeTagihan: "PELAYANAN",
@@ -158,15 +165,35 @@ $( document ).ready( function () {
 		pelayananRest.call( "/pelayanan", tagihan, "POST", succ, message.writeError, false );
 	} );
 	
-	// handler untuk menu ruangan
-	$( document ).on( 'click', '#menu-ruangan', function() {
-		alert( "halaman data ruangan" );
-	} );	
-	
 	// handler untuk menu tagihan ruangan
 	// tagihan ruangan sama dengan tagihan poliklinik
 	$( document ).on( 'click', '#menu-ruangan', function() {
-		page.load( $( '#content' ), 'html/home/poliklinik.html' );
+		page.load( $( '#content' ), 'html/home/ruangan.html' );
+		
+		var unit = session.getSatuanKerja();
+		var pasienRest = rest( "http://222.124.150.12:8080", "patient" );
+		pasienRest.call( "/pasien/unit/" + unit.id, null, "GET", ruanganView.loadRuangan, message.writeError, false );
+	} );
+
+	// handler untuk menyimpan data pasien masuk ruangan
+	$( document ).on( 'click', '#btn-simpan-pasien-masuk', function() {
+		var kodePasien = $( '#txt-kode-pasien' ).val();
+		var unit = session.getSatuanKerja();
+		var pasienRest = rest( 'http://222.124.150.12:8080', 'patient' );
+		var suc = function( res ) {
+			message.success( res );
+			
+			if ( res.tipe != "ERROR" ) {
+				pasienRest.call( "/pasien/unit/" + unit.id, null, "GET", ruanganView.loadRuangan, message.writeError, false );
+			}
+		};
+		
+		pasienRest.call( "/pasien/" + kodePasien + "/unit/" + unit.id, null, "PUT", suc, message.writeError, false );
+	} );
+
+	// handler untuk menu data pasien pada ruangan
+	$( document ).on( 'click', '#menu-ruangan-pasien', function() {
+		alert("Data Pasien");
 	} );
 	
 	// Table Handler
@@ -314,7 +341,7 @@ var tagihanView = {
 		var succ = function( res ) {
 			
 			if ( res.tipe == "ERROR" ) {
-				alert( res.message );
+				message.success( res.message );
 				return;
 			}
 			
@@ -342,14 +369,90 @@ var tagihanView = {
 	},
 	
 	loadTagihan: function( res ) {
-		
+
 		if ( res && res.tipe == 'ERROR' ) {
 			alert( "Belum ada tagihan untuk pasien" );
+			tagihanView.setTable( [] );
 			return;
 		}
 
 		tagihanView.setTable( res.list );
 	}
 	
+};
+
+var ruanganView = {
+
+	loadRuangan: function( res ) {
+		
+		if ( res && res.tipe == "ERROR" ) {
+			message.success( res );
+			ruanganView.setTable( [] );
+		} else {
+			ruanganView.setTable( res.list );
+		}
+
+		if ( res.tipe != "ERROR") {
+		}
+	},
+	
+	setTable: function( data ) {
+		var html = '';
+		var vvip = 0, vip = 0, kelas1 = 0, kelas2 = 0, kelas3 = 0;
+
+		for ( i = 0; i < data.length; i++ ) {
+			var pasien = data[ i ];
+
+			html += '<tr>' +
+				'<td>' + pasien.kode + '</td>' +
+				'<td>' + pasien.penduduk.kode + '</td>' +
+				'<td>' + pasien.nama + '</td>' +
+				'<td>' +
+				'<button type="button" class="btn btn-danger btn-xs pull-right" onclick="ruanganView.outPasien(\'' + pasien.kode + '\')">' +
+				'<span class="glyphicon glyphicon-open" aria-hidden="true"></span>' +
+				' Keluar Ruangan' +
+				'</button>' +
+				'</td>' +
+				'</tr>';
+			
+			switch ( pasien.kelas ) {
+				case 'VVIP': vvip += 1;
+					break;
+				case 'VIP': vip += 1;
+					break;
+				case 'I': kelas1 += 1;
+					break;
+				case 'II': kelas2 += 1;
+					break;
+				case 'III': kelas3 += 1;
+					break;
+			}
+		}
+
+		ruanganView.setSum( vvip, vip, kelas1, kelas2, kelas3 );
+		page.change( $( '#table-ruangan' ), html );
+	},
+	
+	setSum: function( vvip, vip, kelas1, kelas2, kelas3 ) {
+		page.change( $( '#pasien-kelas-vvip' ), vvip + " Orang Pasien VVIP" );
+		page.change( $( '#pasien-kelas-vip' ), vip + " Orang Pasien VIP" );
+		page.change( $( '#pasien-kelas-1' ), kelas1 + " Orang Pasien Kelas 1" );
+		page.change( $( '#pasien-kelas-2' ), kelas2 + " Orang Pasien Kelas 2" );
+		page.change( $( '#pasien-kelas-3' ), kelas3 + " Orang Pasien Kelas 3" );
+	},
+	
+	outPasien: function( kode ) {
+		var pasienRest = rest( "http://222.124.150.12:8080", "patient" )
+		var unit = session.getSatuanKerja();
+		var succ = function( res ) {
+			message.success( res );
+			
+			if ( res.tipe != "ERROR" ) {
+				pasienRest.call( "/pasien/unit/" + unit.id, null, "GET", ruanganView.loadRuangan, message.writeError, false );
+			}
+		};
+		
+		pasienRest.call( "/pasien/" + kode + "/unit", null, "PUT", succ, message.writeError, false );
+	}
 };
 
