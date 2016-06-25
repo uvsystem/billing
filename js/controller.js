@@ -323,7 +323,7 @@ var tagihanView = {
 			}
 			
 			var pasien = storage.get( 'pasien' );
-			pelayananRest.call( "/pelayanan/pasien/" + pasien.id, null, "GET", tagihanView.loadTagihan, message.writeError, false );
+			//pelayananRest.call( "/pelayanan/pasien/" + pasien.id, null, "GET", tagihanView.loadTagihan, message.writeError, false );
 
 			// hapus tagihan dari list
 			var listTagihan = pasien.listTagihan;
