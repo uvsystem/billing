@@ -1,0 +1,88 @@
+<div class="row">
+	<!-- textbox kode pasien -->
+	<div class="input-group">
+		<input type="text" class="form-control" id="txt-kode-pasien" placeholder="Kode Pasien">
+		<span class="input-group-btn">
+			<button class="btn btn-primary" type="button" id="btn-get-data-pasien">
+				<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+				Cari
+			</button>
+		</span>
+	</div><!-- /input-group -->
+</div>
+<div class="row">&nbsp;</div>
+<div class="row">
+	<div class="panel panel-primary">
+		<div class="panel-heading"><h4>DATA PASIEN</h4></div>
+		<ul class="list-group">
+			<li class="list-group-item" id="pasien-medrek">#pasien-medrek</li>
+			<li class="list-group-item" id="pasien-nama">#pasien-nama</li>
+			<li class="list-group-item" id="pasien-umur">#pasien-umur</li>
+			<li class="list-group-item" id="pasien-kelamin">#pasien-kelamin</li>
+			<li class="list-group-item" id="pasien-agama">#pasien-agama</li>
+			<li class="list-group-item">
+				<a id="pasien-kelas">#pasien-kelas</a>
+				<button class="btn btn-primary btn-xs pull-right" type="button" data-toggle="modal" data-target="#modal-form-ubah-kelas">
+					<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+					Ubah
+				</button>
+			</li>
+			<li class="list-group-item">
+				<a id="pasien-tanggungan">#pasien-tanggungan</a>
+				<button class="btn btn-primary btn-xs pull-right" type="button" data-toggle="modal" data-target="#modal-form-ubah-tanggungan">
+					<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+					Ubah
+				</button>
+			</li>
+		</ul>
+	</div>
+</div>
+<!-- Modal untuk ubah kelas pasien -->
+<div class="modal fade" id="modal-form-ubah-kelas" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Tutup</span></button>
+				<h4 class="modal-title">UBAH KELAS PASIEN</h4>
+			</div>
+			<div class="modal-body">
+				<!-- combobox kelas -->
+				<select class="form-control" id="txt-kelas">
+					<option>- PILIH -</option>
+					<option>VVIP</option>
+					<option>VIP</option>
+					<option>I</option>
+					<option>II</option>
+					<option>III</option>
+				</select>
+			</div><!-- modal-body -->
+			<div class="modal-footer">
+				<button class="btn btn-primary" id="btn-pasien-kelas-simpan" data-dismiss="modal">Simpan</button>
+				<button class="btn btn-default" data-dismiss="modal">Tutup</button>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- Modal untuk ubah tanggungan pasien -->
+<div class="modal fade" id="modal-form-ubah-tanggungan" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Tutup</span></button>
+				<h4 class="modal-title">UBAH TANGGUNGAN PASIEN</h4>
+			</div>
+			<div class="modal-body">
+				<!-- combobox kelas -->
+				<select class="form-control" id="txt-tanggungan">
+					<option>- PILIH -</option>
+					<option>UMUM</option>
+					<option>BPJS</option>
+				</select>
+			</div><!-- modal-body -->
+			<div class="modal-footer">
+				<button class="btn btn-primary" id="btn-pasien-tanggungan-simpan" data-dismiss="modal">Simpan</button>
+				<button class="btn btn-default" data-dismiss="modal">Tutup</button>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

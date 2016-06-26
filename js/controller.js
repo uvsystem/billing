@@ -33,6 +33,7 @@ $( document ).ready( function () {
 	
 	setHomePage( role, session.getSatuanKerja() );
 	setNavigation( role, session.getSatuanKerja() );
+	loadData( session.getSatuanKerja() );
 
 	$( function () {
 		$( '[ data-toggle = "tooltip" ]' ).tooltip();
@@ -43,7 +44,7 @@ $( document ).ready( function () {
 		
 		page.change( $( '#message' ), '' );
 		
-		var accountRest = rest( 'http://222.124.150.12:8080', 'account' );
+		var accountRest = rest( server, 'account' );
 		accountRest.logout();
 
 	} );
@@ -75,19 +76,19 @@ $( document ).ready( function () {
 			storage.set( pasien, 'pasien' );
 			
 			page.change( $( '#pasien-medrek' ), "Medrek: " + pasien.penduduk.kode );
-			page.change( $( '#pasien-nama' ), pasien.nama );
-			page.change( $( '#pasien-umur' ), pasien.umur + " Tahun" );
-			page.change( $( '#pasien-kelamin' ), pasien.kelamin );
-			page.change( $( '#pasien-agama'), pasien.agama );
+			page.change( $( '#pasien-nama' ), "Nama: " + pasien.nama );
+			page.change( $( '#pasien-umur' ), "Umur: " + pasien.umur + " Tahun" );
+			page.change( $( '#pasien-kelamin' ), "Jenis Kelamin: " + pasien.kelamin );
+			page.change( $( '#pasien-agama'), "Agama: " + pasien.agama );
 			page.change( $( '#pasien-kelas'), "Kelas " + pasien.kelas );
 			page.change( $( '#pasien-tanggungan'), "Pasien " + pasien.penanggung );
 			
-			var pelayananRest = rest( "http://222.124.150.12:8080", "service");
+			var pelayananRest = rest( server, "service");
 			pelayananRest.call( "/pelayanan/pasien/" + pasien.id, null, "GET", tagihanView.loadTagihan, message.writeError, false );
 			
 		};
 		
-		var pasienRest = rest( "http://222.124.150.12:8080", "patient" );
+		var pasienRest = rest( server, "patient" );
 		pasienRest.call( "/pasien/kode/" + kodePasien, null, "GET", succ, message.writeError, false );
 
 	} );
@@ -125,7 +126,7 @@ $( document ).ready( function () {
 			page.change( $( '#table-tindakan' ), html );
 		};
 		
-		var tindakanRest = rest( 'http://222.124.150.12:8080', 'treatment' );
+		var tindakanRest = rest( server, 'treatment' );
 		tindakanRest.call( "/tindakan/keyword/" + kodeTindakan, null, "GET", succ, message.writeError, false );
 	} );
 	
@@ -156,7 +157,7 @@ $( document ).ready( function () {
 			pelaksana: null
 		}
 
-		var pelayananRest = rest( "http://222.124.150.12:8080", "service");
+		var pelayananRest = rest( server, "service");
 		var succ = function( res ) {
 			message.success( res, "Berhasil menambah tagihan pasien" );
 			pelayananRest.call( "/pelayanan/pasien/" + pasien.id, null, "GET", tagihanView.loadTagihan, message.writeError, false );
@@ -169,17 +170,14 @@ $( document ).ready( function () {
 	// tagihan ruangan sama dengan tagihan poliklinik
 	$( document ).on( 'click', '#menu-ruangan', function() {
 		page.load( $( '#content' ), 'html/home/ruangan.html' );
-		
-		var unit = session.getSatuanKerja();
-		var pasienRest = rest( "http://222.124.150.12:8080", "patient" );
-		pasienRest.call( "/pasien/unit/" + unit.id, null, "GET", ruanganView.loadRuangan, message.writeError, false );
+		ruanganView.resetRuangan();
 	} );
 
 	// handler untuk menyimpan data pasien masuk ruangan
 	$( document ).on( 'click', '#btn-simpan-pasien-masuk', function() {
 		var kodePasien = $( '#txt-kode-pasien' ).val();
 		var unit = session.getSatuanKerja();
-		var pasienRest = rest( 'http://222.124.150.12:8080', 'patient' );
+		var pasienRest = rest( server, 'patient' );
 		var suc = function( res ) {
 			message.success( res );
 			
@@ -193,7 +191,92 @@ $( document ).ready( function () {
 
 	// handler untuk menu data pasien pada ruangan
 	$( document ).on( 'click', '#menu-ruangan-pasien', function() {
-		alert("Data Pasien");
+		page.load( $( '#content' ), 'html/feature/data-pasien.html' );
+	} );
+	
+	// handler untuk fungsi mencari data pasien
+	$( document ).on( 'click', '#btn-get-data-pasien', function() {
+		var kodePasien = $( '#txt-kode-pasien' ).val();
+		var succ = function( res ) {
+			
+			if ( res && res.tipe == 'ERROR' ) {
+				alert( "Tidak ada pasien dengan kode: " + kodePasien );
+				return;
+			}
+
+			var pasien = res.object;
+			storage.set( pasien, 'pasien' );
+			
+			page.change( $( '#pasien-medrek' ), "Medrek: " + pasien.penduduk.kode );
+			page.change( $( '#pasien-nama' ), "Nama: " + pasien.nama );
+			page.change( $( '#pasien-umur' ), "Umur: " + pasien.umur + " Tahun" );
+			page.change( $( '#pasien-kelamin' ), "Jenis Kelamin: " + pasien.kelamin );
+			page.change( $( '#pasien-agama'), "Agama: " + pasien.agama );
+			page.change( $( '#pasien-kelas'), "Kelas " + pasien.kelas );
+			page.change( $( '#pasien-tanggungan'), "Tanggungan " + pasien.penanggung );
+			
+		};
+		
+		var pasienRest = rest( server, "patient" );
+		pasienRest.call( "/pasien/kode/" + kodePasien, null, "GET", succ, message.writeError, false );
+	} );
+	
+	// handler untuk menyimpan kelas pasien yang baru
+	$( document ).on( 'click', '#btn-pasien-kelas-simpan', function() {
+		var kelas = $( '#txt-kelas' ).val();
+		var pasien = storage.get( 'pasien' );
+		
+		if ( kelas == "- PILIH -" ) {
+			alert( "ERROR: Silahkan memilih kelas" );
+			return;
+		}
+		
+		if ( kelas == pasien.kelas ) {
+			alert( "ERROR: Kelas yang anda pilih sama dengan kelas pasien saat ini" );
+			return;
+		}
+		
+		var succ = function( res ) {
+			if ( res && res.tipe == 'ERROR' ) {
+				message.success( res );
+				return;
+			}
+			
+			page.change( $( '#pasien-kelas' ), "Kelas " + kelas );
+			message.success( res, "Kelas pasien berhasil diubah" );
+		};
+		
+		var pasienRest = rest( server, 'patient' );
+		pasienRest.call( "/pasien/" + pasien.id + "/kelas/" + kelas, null, "PUT", succ, message.writeError, false );
+	} );
+	
+	// handler untuk menyimpan tanggungan pasien yang baru
+	$( document ).on( 'click', '#btn-pasien-tanggungan-simpan', function() {
+		var tanggungan = $( '#txt-tanggungan' ).val();
+		var pasien = storage.get( 'pasien' );
+		
+		if ( tanggungan == "- PILIH -" ) {
+			alert( 'ERROR: Silahkan memilih tanggungan' );
+			return;
+		}
+		
+		if ( tanggungan == pasien.penanggung ) {
+			alert( "ERROR: Tanggungan yang anda pilih sama dengan tanggungan pasien saat ini" );
+			return;
+		}
+		
+		var succ = function( res ) {
+			if ( res && res.tipe == 'ERROR' ) {
+				message.success( res );
+				return;
+			}
+			
+			page.change( $( '#pasien-tanggungan' ), "Tanggungan " + tanggungan );
+			message.success( res, "Tanggungan pasien berhasil diubah" );
+		};
+		
+		var pasienRest = rest( server, 'patient' );
+		pasienRest.call( "/pasien/" + pasien.id + "/penanggung/" + tanggungan, null, "PUT", succ, message.writeError, false );
 	} );
 	
 	// Table Handler
@@ -309,6 +392,23 @@ function setHomePage( role, unit ) {
 	}
 };
 
+function loadData( unit ) {
+	var tipe = unit.tipe;
+	if ( tipe == "POLIKLINIK" || tipe == "PENUNJANG_MEDIK" ) {
+		// DO NOTHING
+	} else if ( tipe == "LOKET_PENDAFTARAN" ) {
+		// DO NOTHING
+	} else if ( tipe == "LOKET_PEMBAYARAN" ) {
+		// DO NOTHING
+	} else if ( tipe == "RUANG_PERAWATAN" || tipe == "ICU" ) {
+		ruanganView.resetRuangan();
+	} else if ( tipe == "APOTEK_FARMASI" ) {
+		// DO NOTHING
+	} else if ( tipe == "UGD" ) {
+		// DO NOTHING
+	}
+};
+
 var tagihanView = {
 	
 	setTable: function( data ) {
@@ -337,7 +437,7 @@ var tagihanView = {
 	},
 	
 	dropTagihan: function( id ) {
-		var pelayananRest = rest( "http://222.124.150.12:8080", "service");
+		var pelayananRest = rest( server, "service");
 		var succ = function( res ) {
 			
 			if ( res.tipe == "ERROR" ) {
@@ -383,6 +483,12 @@ var tagihanView = {
 
 var ruanganView = {
 
+	resetRuangan: function() {
+		var unit = session.getSatuanKerja();
+		var pasienRest = rest( server, "patient" );
+		pasienRest.call( "/pasien/unit/" + unit.id, null, "GET", ruanganView.loadRuangan, message.writeError, false );
+	},
+	
 	loadRuangan: function( res ) {
 		
 		if ( res && res.tipe == "ERROR" ) {
@@ -442,7 +548,7 @@ var ruanganView = {
 	},
 	
 	outPasien: function( kode ) {
-		var pasienRest = rest( "http://222.124.150.12:8080", "patient" )
+		var pasienRest = rest( server, "patient" )
 		var unit = session.getSatuanKerja();
 		var succ = function( res ) {
 			message.success( res );

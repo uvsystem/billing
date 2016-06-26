@@ -8,6 +8,9 @@
  * Version: 1.1.0
  */
 
+// Alamat server
+var server = "http://222.124.150.12:8080";
+
 /** Alamat server untuk menyimpan file */
 var targetImage = 'http://222.124.150.12/'; 
 function upload( file, kode, directory, submit ) {
