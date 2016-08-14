@@ -278,6 +278,27 @@ $( document ).ready( function () {
 		var pasienRest = rest( server, 'patient' );
 		pasienRest.call( "/pasien/" + pasien.id + "/penanggung/" + tanggungan, null, "PUT", succ, message.writeError, false );
 	} );
+
+	// handler untuk buka halaman daftar pasien
+	$( document ).on( 'click', '#menu-daftar', function() {
+		page.load( $( '#content' ), 'html/home/pendaftaran.html' );
+	} );
+
+	// handler cari medrek pasien
+	$( document ).on( 'click', '#btn-get-medrek', function() {
+		var keyword = $( '#txt-keyword' ).val();
+		var succ = function( res ) {
+			alert(JSON.stringify(res));
+		};
+		
+		var pasienRest = rest( server, "patient" );
+		pasienRest.call( "/penduduk/keyword/" + keyword, null, "GET", succ, message.writeError, false );
+	} );
+	
+	// handler simpan medrek
+	$( document ).on( 'click', '#btn-medrek-simpan', function() {
+		alert("SIMPAN");
+	} );
 	
 	// Table Handler
 	$( document ).on( 'click', '#prev', function() {
@@ -562,3 +583,13 @@ var ruanganView = {
 	}
 };
 
+var medrekView = {
+	
+	setTable: function( data ) {
+		
+	},
+	
+	load: function( res ) {
+		
+	}
+};
